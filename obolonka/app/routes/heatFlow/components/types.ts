@@ -39,3 +39,4 @@ export const isHeatNode = (node: AppNode): node is Node<HeatSourceNodeData> => {
         (!('connectedHeaters' in node.data) && node.type !== 'house')
     );
 };
+

@@ -1,3 +1,4 @@
+import '@xyflow/react/dist/style.css';
 import React, { useCallback, useRef, useState } from 'react';
 import {
     ReactFlow,
@@ -11,7 +12,6 @@ import {
     MarkerType,
     type ReactFlowInstance,
 } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
 import type { ConnectionStats, AppNode } from './types';
 import { nodeTypes } from './nodes';
 
@@ -41,8 +41,8 @@ export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElemen
                         data: {
                             ...node.data,
                             connectedHeaters,
-                        },
-                    };
+                        } as typeof node.data,
+                    } as AppNode;
                 }
                 return node;
             });
@@ -131,7 +131,7 @@ export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElemen
         const heaters = nodes.filter((n) => n.type === 'heat');
 
         const connectedHouses = houses.filter(
-            (h) => h.data.connectedHeaters && h.data.connectedHeaters.length > 0
+            (h) => Array.isArray(h.data.connectedHeaters) && h.data.connectedHeaters.length > 0
         ).length;
 
         return {

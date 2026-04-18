@@ -1,10 +1,17 @@
 import { type ReactElement } from 'react';
-import { Handle, Position, useNodes, type NodeProps } from '@xyflow/react';
+import { Handle, Position, useNodes, useReactFlow, type NodeProps } from '@xyflow/react';
 import type { NodeData } from './types';
 import '../css/nodes.css';
 
 // House Node Component
-export function HouseNode({ data }: NodeProps): ReactElement {
+export function HouseNode({ id, data }: NodeProps): ReactElement {
+    const { deleteElements } = useReactFlow();
+
+    const onDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        deleteElements({ nodes: [{ id }] });
+    };
+
     const allNodes = useNodes();
 
     const label = data.label as string;
@@ -17,6 +24,10 @@ export function HouseNode({ data }: NodeProps): ReactElement {
 
     return (
         <div className="custom-node house-node">
+            <button className="delete-button" onClick={onDelete} title="Delete node">
+                ×
+            </button>
+
             <Handle type="target" position={Position.Left} style={{ borderRadius: '2px' }} />
 
             <div style={{ fontWeight: 'bold', color: '#007acc' }}>
@@ -37,11 +48,22 @@ export function HouseNode({ data }: NodeProps): ReactElement {
 }
 
 // Heat Node Component
-export function HeatNode({ data }: NodeProps): ReactElement {
+export function HeatNode({ id, data }: NodeProps): ReactElement {
+    const { deleteElements } = useReactFlow();
+
+    const onDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        deleteElements({ nodes: [{ id }] });
+    };
+
     const { label } = data as unknown as NodeData;
 
     return (
         <div className="custom-node heat-node">
+            <button className="delete-button" onClick={onDelete} title="Delete node">
+                ×
+            </button>
+
             <div style={{ fontWeight: 'bold', color: '#e34c26' }}>
                 HEAT SRC: {label}
             </div>
