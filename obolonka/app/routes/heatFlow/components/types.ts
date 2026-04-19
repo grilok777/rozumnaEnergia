@@ -18,8 +18,6 @@ export type NodeData = HouseNodeData | HeatSourceNodeData;
 
 export type AppNode = Node<NodeData>;
 
-export type AppEdge = Edge;
-
 export interface ConnectionStats {
     totalHouses: number;
     totalHeaters: number;

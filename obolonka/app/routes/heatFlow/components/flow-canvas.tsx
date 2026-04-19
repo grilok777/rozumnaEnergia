@@ -1,4 +1,5 @@
 import '@xyflow/react/dist/style.css';
+import '../css/edge.css';
 import React, { useCallback, useRef, useState } from 'react';
 import {
     ReactFlow,
@@ -12,9 +13,21 @@ import {
     MarkerType,
     type ReactFlowInstance,
 } from '@xyflow/react';
-import { ConfigForm } from './forms';
 import type { ConnectionStats, AppNode, NodeData } from './types';
 import { createNodeData, nodeTypes } from './nodes';
+import { ConfigForm } from './forms';
+import { EdgeHint } from './hints';
+
+const defaultEdgeOptions = {
+    type: 'smoothstep',
+    animated: false,
+    interactionWidth: 25,
+    style: { stroke: '#e37e69', strokeWidth: 2 },
+    markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: '#e37e69',
+    },
+};
 
 interface FlowCanvasProps {
     sidebarWidth: number;
@@ -232,30 +245,30 @@ export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElemen
                     onNodesChange={onNodesChange}
                     onNodeClick={onNodeClick}
                     onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
                     onEdgesDelete={onEdgesDelete}
+                    onConnect={onConnect}
+                    defaultEdgeOptions={defaultEdgeOptions}
+
                     onInit={setReactFlowInstance}
                     onDrop={onDrop}
                     onDragOver={onDragOver}
+
+                    deleteKeyCode={["Backspace", "Delete"]}
+                    selectionKeyCode="Shift"
+                    multiSelectionKeyCode="Shift"
+                    fitView
+
                     nodeTypes={nodeTypes}
                     nodeOrigin={[0.5, 0.5]}
                     connectionRadius={50}
-                    // connectionMode={ConnectionMode.Loose}
-                    defaultEdgeOptions={{
-                        type: 'smoothstep',
-                        animated: true,
-                        style: { stroke: '#e37e69', strokeWidth: 2 },
-                        markerEnd: {
-                            type: MarkerType.ArrowClosed,
-                            color: '#e37e69',
-                        },
-                    }}
+                // connectionMode={ConnectionMode.Loose}
                 >
-                    <Background />
+                    <Background color="#adb8c594" gap={15} size={2} />
+
+                    <EdgeHint />
                     <Controls />
                 </ReactFlow>
 
-                {/* Відображаємо форму, якщо обрано ноду */}
                 {selectedNode && (
                     <ConfigForm
                         node={selectedNode}
