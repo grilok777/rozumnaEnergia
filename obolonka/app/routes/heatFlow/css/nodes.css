@@ -21,6 +21,13 @@
     transform: translateY(-2px);
 }
 
+.house-node.selected {
+    border-color: #005fa3;
+    box-shadow: 0 4px 12px rgba(0, 122, 204, 0.2);
+    transform: translateY(-2px);
+    background: #e8f2ff;
+}
+
 .heat-node {
     background: #fff5f2;
     border: 1px solid #e34c26;
@@ -32,6 +39,48 @@
     transform: scale(1.02);
 }
 
+.heat-node.selected {
+    border-color: #c53a1b;
+    box-shadow: 0 4px 12px rgba(227, 76, 38, 0.2);
+    transform: scale(1.02);
+    background: #ffede6;
+}
+
+/* selection indicator */
+.custom-node.selected {
+    position: relative;
+}
+
+.custom-node.selected::before {
+    content: "✓";
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 18px;
+    height: 18px;
+    background: #4caf50;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid white;
+    animation: fadeInScale 0.2s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 .custom-tooltip {
     visibility: hidden;
     opacity: 0;
@@ -40,7 +89,7 @@
     left: 50%;
     transform: translateX(-50%);
     color: white;
-    padding: 6px 10px;
+    padding: 3px 8px;
     border-radius: 4px;
     font-size: 10px;
     white-space: nowrap;

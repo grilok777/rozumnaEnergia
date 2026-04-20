@@ -1,22 +1,30 @@
-import { useEdges } from '@xyflow/react';
+import { useEdges, useNodes } from '@xyflow/react';
+import type { AppNode } from '../types/types';
 
-export function EdgeHint() {
+export function SelectionHint() {
     const edges = useEdges();
-    const isEdgeSelected = edges.some((e) => e.selected);
+    const nodes = useNodes();
+
+    const selectedEdges = edges.filter((e) => e.selected);
+    const selectedNodes = nodes.filter((n) => n.selected);
+    const hasSelection = selectedEdges.length > 0 || selectedNodes.length > 0;
+
+    const selectedCount = selectedEdges.length + selectedNodes.length;
+    const isMultiple = selectedCount > 1;
 
     return (
         <div
             className={`
-    fixed bottom-4 right-4 z-[1000] pointer-events-none select-none
-    transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]
-    ${isEdgeSelected
+                fixed bottom-4 right-4 z-[1000] pointer-events-none select-none
+                transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+                ${hasSelection
                     ? 'opacity-100 translate-y-0 scale-100'
                     : 'opacity-0 translate-y-4 scale-90'}
-  `}
+            `}
         >
             <div className="bg-white/80 backdrop-blur-md text-gray-900 px-3 py-1.5 rounded-full shadow-lg border border-gray-200 flex items-center gap-3">
                 <div className="flex items-center gap-1.5 text-xs">
-                    {/* Клавіша Del */}
+                    {/* Клавіша Delete */}
                     <kbd className="min-w-[20px] px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[10px] font-medium text-gray-900 shadow-sm">
                         Del
                     </kbd>
@@ -40,7 +48,11 @@ export function EdgeHint() {
                         </svg>
                     </kbd>
 
-                    <span className="text-gray-700 ml-0.5 font-medium">to delete edge</span>
+                    <span className="text-gray-700 ml-0.5 font-medium">
+                        to delete {isMultiple ? `${selectedCount} items` :
+                                   selectedNodes.length === 1 ? 'node' :
+                                   selectedEdges.length === 1 ? 'edge' : 'item'}
+                    </span>
                 </div>
             </div>
         </div>
