@@ -112,7 +112,7 @@ export function ConfigForm({ node, onUpdate, onClose }: ConfigFormProps) {
                     <button
                         type="button"
                         onClick={handleCancel}
-                        className="text-gray-400 hover:text-gray-600 transition-colors duration-150 p-1 rounded-lg hover:bg-gray-100"
+                        className="text-gray-400 hover:text-gray-600 transition-colors duration-150 p-1 rounded-lg hover:bg-gray-100 cursor-pointer"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -200,7 +200,7 @@ export function ConfigForm({ node, onUpdate, onClose }: ConfigFormProps) {
                                        active:scale-[0.98]
                                        ${hasChanges
                                     ? `${isHeat ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
-                                       : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'} cursor-pointer`
+                                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'} cursor-pointer`
                                     : 'bg-gray-400 cursor-not-allowed opacity-60'
                                 }`}
                         >

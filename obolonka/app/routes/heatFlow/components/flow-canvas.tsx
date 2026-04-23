@@ -16,7 +16,7 @@ import {
 import type { ConnectionStats, AppNode, NodeData } from '../types/types';
 import { createNodeData, nodeTypes } from './nodes';
 import { ConfigForm } from './forms';
-import { SelectionHint } from './hints';
+import { EmptyCanvasHint, SelectionHint } from './hints';
 
 const defaultEdgeOptions = {
     type: 'smoothstep',
@@ -283,7 +283,10 @@ export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElemen
                 >
                     <Background color="#adb8c594" gap={15} size={2} />
 
+                    {/* Hints */}
+                    <EmptyCanvasHint />
                     <SelectionHint />
+
                     <Controls />
                 </ReactFlow>
 

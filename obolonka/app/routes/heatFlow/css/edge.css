@@ -1,19 +1,25 @@
-/* Коли ребро вибране, додаємо лише світіння */
 .react-flow__edge.selected .react-flow__edge-path {
-  /* Залишаємо оригінальний колір і товщину */
-  stroke: #e37e69 !important;
-  stroke-width: 3px !important;
+    stroke: #e37e69 !important;
+    stroke-width: 3px !important;
 
-  /* Додаємо м'яку кольорову тінь навколо лінії */
-  /* 0 0 8px — це радіус розмиття. Можна зробити 5px для меншого ефекту */
-  filter: drop-shadow(0 0 5px #e37e69) !important;
+    filter: drop-shadow(0 0 5px #e37e69) !important;
 
-  /* Опціонально: робимо колір трішки насиченішим */
-  stroke-opacity: 1 !important;
+    stroke-opacity: 1 !important;
 }
 
-/* Також підсвічуємо стрілочку (marker) */
 .react-flow__edge.selected .react-flow__edge-marker path {
-  fill: #e37e69 !important;
-  filter: drop-shadow(0 0 3px #e37e69);
+    fill: #e37e69 !important;
+    filter: drop-shadow(0 0 3px #e37e69);
+}
+
+.react-flow {
+  user-select: none;
+}
+
+.react-flow * {
+  user-select: none;
+}
+
+.react-flow__pane {
+    user-select: none;
 }
