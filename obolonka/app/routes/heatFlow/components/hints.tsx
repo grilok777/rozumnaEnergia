@@ -84,9 +84,9 @@ export function SelectionHint() {
                     </kbd>
 
                     <span className="text-gray-700 ml-0.5 font-medium">
-                        to delete {isMultiple ? `${selectedCount} items` :
-                                   selectedNodes.length === 1 ? 'node' :
-                                   selectedEdges.length === 1 ? 'edge' : 'item'}
+                        щоб видалити {isMultiple ? `${selectedCount} елементів` :
+                                   selectedNodes.length === 1 ? 'ноду' :
+                                   selectedEdges.length === 1 ? 'ребро' : 'елемент'}
                     </span>
                 </div>
             </div>

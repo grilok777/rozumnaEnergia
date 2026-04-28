@@ -13,10 +13,12 @@ import {
     MarkerType,
     type ReactFlowInstance,
 } from '@xyflow/react';
-import type { ConnectionStats, AppNode, NodeData } from '../types/types';
+import { type ConnectionStats, type AppNode, type NodeData, isHouseNode } from '../types/types';
 import { createNodeData, nodeTypes } from './nodes';
 import { ConfigForm } from './forms';
 import { EmptyCanvasHint, SelectionHint } from './hints';
+import { logSystemTree, runSimulation, type ChartDataPoint } from '../services/simulations';
+import SimulationResultsModal from './SimulationResModal';
 
 const defaultEdgeOptions = {
     type: 'smoothstep',
@@ -31,9 +33,10 @@ const defaultEdgeOptions = {
 
 interface FlowCanvasProps {
     sidebarWidth: number;
+    minWidth: number;
 }
 
-export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElement {
+export function FlowCanvas({ sidebarWidth, minWidth }: FlowCanvasProps): React.ReactElement {
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
     const [selectedNode, setSelectedNode] = useState<AppNode | null>(null);
@@ -44,6 +47,9 @@ export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElemen
 
     const [isConfigOpen, setIsConfigOpen] = useState(false);
     const [nodeForConfig, setNodeForConfig] = useState<AppNode | null>(null);
+
+    const [simulationData, setSimulationData] = useState<ChartDataPoint[] | null>(null);
+    const [isSimulating, setIsSimulating] = useState(false);
 
     const updateHouseConnections = useCallback((currentEdges: Edge[]) => {
         setNodes((nds) => {
@@ -73,29 +79,47 @@ export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElemen
             const sourceNode = nodes.find((n) => n.id === params.source);
             const targetNode = nodes.find((n) => n.id === params.target);
 
-            if (sourceNode?.type === 'heat' && targetNode?.type === 'house') {
-                const newEdge: Edge = {
-                    ...params,
-                    id: `edge-${params.source}-${params.target}`,
-                    type: 'smoothstep',
-                    animated: true,
-                    style: { stroke: '#e37e69', strokeWidth: 2 },
-                    markerEnd: {
-                        type: MarkerType.ArrowClosed,
-                        color: '#e37e69',
-                    },
-                };
+            // Перевіряємо, чи вже є вхідне з'єднання у цільової ноди
+            const isTargetOccupied = edges.some((edge) => edge.target === params.target);
 
-                setEdges((eds) => {
-                    const updatedEdges = addEdge(newEdge, eds);
-                    updateHouseConnections(updatedEdges);
-                    return updatedEdges;
-                });
-            } else {
-                alert('Можна з\'єднувати тільки Джерело тепла з Будинком!');
+            // Правила валідації
+            const isHeatToTank = sourceNode?.type === 'heat' && targetNode?.type === 'tank';
+            const isTankToHouse = sourceNode?.type === 'tank' && targetNode?.type === 'house';
+
+            // 1. ПЕРЕВІРКА ТИПІВ: Тільки Heat -> Tank або Tank -> House
+            if (!isHeatToTank && !isTankToHouse) {
+                console.warn('Недопустимий тип з’єднання. Баки підключаються до будинків, а джерела — до баків.');
+                return;
             }
+
+            // 2. ПЕРЕВІРКА КІЛЬКОСТІ: Тільки одне вхідне з'єднання
+            if (isTargetOccupied) {
+                console.warn(`Цей ${targetNode?.type} вже має підключене джерело.`);
+                return;
+            }
+
+            // Якщо перевірки пройдено — створюємо лінію
+            const edgeColor = sourceNode?.type === 'heat' ? '#e37e69' : '#10b981';
+
+            const newEdge: Edge = {
+                ...params,
+                id: `edge-${params.source}-${params.target}`,
+                type: 'smoothstep',
+                animated: true,
+                style: { stroke: edgeColor, strokeWidth: 2 },
+                markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    color: edgeColor,
+                },
+            };
+
+            setEdges((eds) => {
+                const updatedEdges = addEdge(newEdge, eds);
+                updateHouseConnections(updatedEdges);
+                return updatedEdges;
+            });
         },
-        [nodes, setEdges, updateHouseConnections]
+        [nodes, edges, setEdges, updateHouseConnections]
     );
 
     const onEdgesDelete = useCallback(
@@ -130,14 +154,28 @@ export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElemen
                 y: event.clientY,
             });
 
-            const newNode: AppNode = {
-                id: `${type}-${Date.now()}`,
-                type,
-                position,
-                data: createNodeData(type, nodes.length + 1),
-            };
+            // const newNode: AppNode = {
+            //     id: `${type}-${Date.now()}`,
+            //     type,
+            //     position,
+            //     data: createNodeData(type, nodes.length + 1),
+            // };
 
-            setNodes((nds) => [...nds, newNode]);
+            setNodes((nds) => {
+                if (type === 'house' && nds.some(n => n.type === 'house')) {
+                    console.warn('Будинок вже існує');
+                    return nds;
+                }
+
+                const newNode: AppNode = {
+                    id: `${type}-${Date.now()}`,
+                    type,
+                    position,
+                    data: createNodeData(type, nds.length + 1),
+                };
+
+                return [...nds, newNode];
+            });
         },
         [reactFlowInstance, nodes.length, setNodes]
     );
@@ -196,6 +234,59 @@ export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElemen
 
     const stats = getConnectionStats();
 
+    const handleStartSimulation = () => {
+        // 1. перевірка
+        if (stats.connectedHouses < stats.totalHouses) {
+            alert("Підключіть всі будинки до джерел тепла та/або бака перед запуском симуляції.");
+            return;
+        }
+
+        logSystemTree(nodes, edges);
+
+        if (stats.connectedHouses < stats.totalHouses) {
+            alert("Увага: Не всі будинки підключені!");
+        }
+
+        // 1. Знаходимо будинок (точка входу)
+        const house = nodes.find(isHouseNode);
+        if (!house) {
+            alert('Будинок не знайдено!');
+            throw new Error("House node not found");
+        }
+
+        // 2. Шукаємо танк, підключений до будинку
+        const edgeToHouse = edges.find(e => e.target === house.id);
+        const tankNode = nodes.find(n => n.id === edgeToHouse?.source && n.type === 'tank');
+
+        if (!tankNode) {
+            // Якщо танк не обов'язковий, можна просто логувати,
+            // але для розрахунків краще зупинити процес
+            throw new Error("До будинку не підключено бак-акумулятор!");
+        }
+
+        // 3. Шукаємо джерело тепла, підключене до танка
+        const edgeToTank = edges.find(e => e.target === tankNode.id);
+        const heatPump = nodes.find(n => n.id === edgeToTank?.source && n.type === 'heat');
+
+        if (!heatPump) {
+            alert('До бака не підключено джерело тепла!');
+            throw new Error("До бака не підключено джерело тепла!");
+        }
+
+
+        setIsSimulating(true);
+
+        const result = runSimulation(
+            house,
+            tankNode,
+            heatPump,
+            100,   // 100 годин
+            1,     // крок 1 година
+        );
+
+        setSimulationData(result);
+    };
+
     return (
         <div style={{
             display: 'flex',
@@ -205,30 +296,46 @@ export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElemen
             overflow: 'hidden'
         }}>
             <div className="flex flex-wrap items-center justify-center gap-x-8 px-3 py-2 bg-white border-b border-gray-200 shadow-md shrink-0 select-none cursor-default">
+                {/* Simulation Button */}
+                <button
+                    onClick={handleStartSimulation}
+                    className="ml-4 flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white px-6 py-2 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 group"
+                >
+                    <span className="text-sm font-bold uppercase tracking-wider">Запустити симуляцію</span>
+                    <svg
+                        className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </button>
+
                 {/* Статистика будинків */}
                 <div className="flex items-center gap-3 group whitespace-nowrap select-none">
                     <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                    <span className="text-gray-500 uppercase text-[11px] tracking-wider select-none">Houses</span>
+                    <span className="text-gray-500 uppercase text-[11px] tracking-wider select-none">Ксть будинків</span>
                     <span className="font-medium text-gray-900 text-base select-none">{stats.totalHouses}</span>
                 </div>
 
                 {/* Статистика джерел тепла */}
                 <div className="flex items-center gap-3 group whitespace-nowrap select-none">
                     <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                    <span className="text-gray-500 uppercase text-[11px] tracking-wider select-none">Heat Sources</span>
+                    <span className="text-gray-500 uppercase text-[11px] tracking-wider select-none">Ксть джерел тепла</span>
                     <span className="font-medium text-gray-900 text-base select-none">{stats.totalHeaters}</span>
                 </div>
 
                 {/* Статистика з'єднань */}
                 <div className="flex items-center gap-3 group whitespace-nowrap select-none">
                     <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
-                    <span className="text-gray-500 uppercase text-[11px] tracking-wider select-none">Connections</span>
+                    <span className="text-gray-500 uppercase text-[11px] tracking-wider select-none">Ксть з'єднань</span>
                     <span className="font-medium text-gray-900 text-base select-none">{stats.totalConnections}</span>
                 </div>
 
                 {/* Прогрес підключення */}
                 <div className="flex items-center gap-2 bg-gray-50 px-5 py-1 rounded-xl border border-gray-100 min-w-fit select-none cursor-default">
-                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold select-none">Status</span>
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold select-none">Статус підключення</span>
                     <div className="flex items-baseline gap-1 select-none">
                         <span className={`text-base font-bold ${stats.connectedHouses === stats.totalHouses ? 'text-green-600' : 'text-blue-600'} select-none`}>
                             {stats.connectedHouses}
@@ -300,6 +407,16 @@ export function FlowCanvas({ sidebarWidth }: FlowCanvasProps): React.ReactElemen
                         }}
                     />
                 )}
+
+
+                <SimulationResultsModal
+                    isOpen={isSimulating}
+                    data={simulationData}
+                    onClose={() => {
+                        setIsSimulating(false);
+                        setSimulationData(null);
+                    }}
+                />
             </div>
         </div>
     );

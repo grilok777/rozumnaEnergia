@@ -3,7 +3,7 @@ import '@xyflow/react/dist/style.css';
 import { Sidebar } from './sidebar';
 import { FlowCanvas } from './flow-canvas';
 
-export default function App(): JSX.Element {const [sidebarWidth, setSidebarWidth] = useState(250);
+export default function App(): JSX.Element {const [sidebarWidth, setSidebarWidth] = useState(300);
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -27,7 +27,7 @@ export default function App(): JSX.Element {const [sidebarWidth, setSidebarWidth
             margin: 0,
             padding: 0
         }}>
-            <Sidebar width={sidebarWidth} setWidth={setSidebarWidth} />
+            <Sidebar width={sidebarWidth} minWidth={sidebarWidth} setWidth={setSidebarWidth} />
 
             <main style={{
                 flexGrow: 1,
@@ -36,7 +36,7 @@ export default function App(): JSX.Element {const [sidebarWidth, setSidebarWidth
                 display: 'flex',
                 flexDirection: 'column'
             }}>
-                <FlowCanvas sidebarWidth={sidebarWidth} />
+                <FlowCanvas sidebarWidth={sidebarWidth} minWidth={sidebarWidth} />
             </main>
         </div>
     );
