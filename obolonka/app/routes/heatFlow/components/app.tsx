@@ -1,3 +1,7 @@
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/600.css';
+import '@fontsource/roboto/700.css';
 import { useState, useEffect, type JSX } from 'react';
 import '@xyflow/react/dist/style.css';
 import { Sidebar } from './sidebar';

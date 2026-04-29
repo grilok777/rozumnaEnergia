@@ -58,13 +58,13 @@ export function Sidebar({ width, minWidth, setWidth }: SidebarProps): ReactEleme
     return (
         <aside
             className="relative flex flex-col h-full border-r border-slate-200 bg-slate-50 transition-[width] duration-75"
-            style={{ width: `${width}px`, minWidth: `${width}px` }}
+            style={{ width: `${width}px`, minWidth: `${minWidth}px` }}
         >
             {/* Header */}
             <div className="px-5 py-6 flex items-center gap-2 select-none">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                 <h2 className="text-[11px] font-black uppercase tracking-[1.5px] text-slate-400">
-                    Component Library
+                    Бібліотека вузлів
                 </h2>
             </div>
 
@@ -83,8 +83,8 @@ export function Sidebar({ width, minWidth, setWidth }: SidebarProps): ReactEleme
                         </svg>
                     </div>
                     <div className="flex flex-col text-left">
-                        <span className="text-sm font-bold text-slate-700 leading-tight">Heat Source</span>
-                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Producer</span>
+                        <span className="text-sm font-bold text-slate-700 leading-tight">Тепловий насос</span>
+                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Джерело тепла</span>
                     </div>
                 </div>
 
@@ -102,8 +102,8 @@ export function Sidebar({ width, minWidth, setWidth }: SidebarProps): ReactEleme
                         </svg>
                     </div>
                     <div className="flex flex-col text-left">
-                        <span className="text-sm font-bold text-slate-700 leading-tight">Buffer Tank</span>
-                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Storage</span>
+                        <span className="text-sm font-bold text-slate-700 leading-tight">Резервуар води</span>
+                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Резервуар</span>
                     </div>
                 </div>
 
@@ -120,8 +120,8 @@ export function Sidebar({ width, minWidth, setWidth }: SidebarProps): ReactEleme
                         </svg>
                     </div>
                     <div className="flex flex-col text-left">
-                        <span className="text-sm font-bold text-slate-700 leading-tight">House</span>
-                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Consumer</span>
+                        <span className="text-sm font-bold text-slate-700 leading-tight">Будинок</span>
+                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Споживач</span>
                     </div>
                 </div>
             </div>

@@ -9,6 +9,7 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@fontsource/roboto": "^5.2.10",
     "@react-router/node": "7.13.1",
     "@react-router/serve": "7.13.1",
     "@xyflow/react": "^12.10.2",

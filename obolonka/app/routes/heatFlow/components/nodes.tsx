@@ -40,21 +40,21 @@ export function TankNode({ id, data, selected }: NodeProps): ReactElement {
 
             <div className="flex flex-col gap-1">
                 <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase rounded border border-emerald-200 leading-none w-fit">
-                    Buffer Tank
+                    Водяний бак
                 </span>
 
                 <div className="text-sm font-bold text-gray-800">
-                    {tankData.label || 'Storage Tank'}
+                    {tankData.label || 'Водяний бак'}
                 </div>
 
                 <div className="mt-1 flex flex-col gap-0.5">
                     {/* Об'єм танку */}
                     <div className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1 rounded w-fit">
-                        {tankData.vTank ?? 0} L
+                        {tankData.vTank} L
                     </div>
                     {/* Температура */}
                     <div className="text-[9px] text-gray-400 font-medium">
-                        Target: {tankData.tWaterNorm ?? 55}°C
+                        Температурна ціль : {tankData.tWaterNorm}°C
                     </div>
                 </div>
             </div>
@@ -70,7 +70,7 @@ export function TankNode({ id, data, selected }: NodeProps): ReactElement {
                     transition-all duration-200 bottom-full left-1/2 -translate-x-1/2 mb-3
                     z-50 whitespace-nowrap bg-gray-900 text-white text-[10px]
                     px-2 py-2 rounded shadow-xl pointer-events-none">
-                {`Capacity: ${tankData.vTank}L | ${tankData.tWaterNorm}°C`}
+                {`Обєм: ${tankData.vTank}L | ${tankData.tWaterNorm}°C`}
                 <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
             </div>
         </div>
@@ -96,7 +96,7 @@ export function HouseNode({ id, data, selected }: NodeProps): ReactElement {
 
             <div className="flex flex-col">
                 <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[9px] font-black uppercase rounded border border-blue-200 leading-none w-fit">
-                    Consumer
+                    Будинок
                 </span>
 
                 <div className="text-sm font-bold text-gray-800">
@@ -105,11 +105,11 @@ export function HouseNode({ id, data, selected }: NodeProps): ReactElement {
 
                 <div className="flex flex-col gap-0.5">
                     <div className="text-[10px] text-blue-600 font-bold bg-blue-50 px-1 rounded w-fit">
-                        Pipe: {houseData.lPipe ?? 0}m
+                        Труба: {houseData.lPipe}m
                     </div>
                     {houseData.vFlowPipe !== undefined && (
                         <div className="text-[9px] text-gray-400">
-                            Flow: {Number(houseData.vFlowPipe).toFixed(2)} m/s
+                            Потік: {Number(houseData.vFlowPipe).toFixed(2)} m/s
                         </div>
                     )}
                 </div>
@@ -121,7 +121,7 @@ export function HouseNode({ id, data, selected }: NodeProps): ReactElement {
                     transition-all duration-200 bottom-full left-1/2 -translate-x-1/2 mb-3
                     z-50 whitespace-nowrap bg-gray-900 text-white text-[10px]
                     px-2 py-2 rounded shadow-xl pointer-events-none">
-                {`L: ${houseData.lPipe ?? 0}m | V: ${Number(houseData.vFlowPipe || 0).toFixed(2)}m/s`}
+                {`L: ${houseData.lPipe}m | V: ${Number(houseData.vFlowPipe).toFixed(2)}m/s`}
                 {/* Стрілочка тултіпа */}
                 <div className="absolute top-full left-1/2 -translate-x-1/2 border-5 border-transparent border-t-gray-900"></div>
             </div>
@@ -133,35 +133,61 @@ export function HouseNode({ id, data, selected }: NodeProps): ReactElement {
 export function HeatNode({ id, data, selected }: NodeProps): ReactElement {
     const { deleteElements } = useReactFlow();
 
-    const isHeat = isHeatPump({ data } as AppNode);
-    const heatData = data as unknown as HeatSourceNodeData;
+    const heatData = data as HeatSourceNodeData;
+    const pump = heatData.pumpParams;
 
     return (
-        <div className={`custom-node heat-node ${selected ? 'selected' : ''}`}>
-            <DeleteButton onClick={(e) => { e.stopPropagation(); deleteElements({ nodes: [{ id }] }); }} />
+        <div className={`custom-node heat-node group ${selected ? 'selected' : ''}`}>
+
+            <DeleteButton
+                onClick={(e) => {
+                    e.stopPropagation();
+                    deleteElements({ nodes: [{ id }] });
+                }}
+            />
+
+            <Handle
+                type="source"
+                position={Position.Right}
+                className="w-2 h-2 !bg-orange-400"
+            />
 
             <div className="flex flex-col gap-1">
                 <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-[9px] font-black uppercase rounded border border-orange-200 leading-none w-fit">
-                    Heat Source
+                    Джерело тепла
                 </span>
 
                 <div className="text-sm font-bold text-gray-800">
-                    {(data.label as string) || 'Unnamed Source'}
+                    {(data.label as string) || 'Безіменне джерело'}
                 </div>
 
-                {heatData.pumpParams && (
+                {pump && (
                     <div className="mt-1 flex items-center gap-1.5">
                         <div className="text-[10px] text-orange-600 font-bold bg-orange-50 px-1 rounded">
-                            {heatData.pumpParams.qCop235} kW
+                            {pump.qCop235} kW
                         </div>
                         <div className="text-[9px] text-gray-400">
-                            COP: {heatData.pumpParams.cop235}
+                            COP: {pump.cop235}
                         </div>
                     </div>
                 )}
             </div>
 
-            <Handle type="source" position={Position.Right} className="w-2 h-2 !bg-orange-400" />
+            {/* Tooltip */}
+            {pump && (
+                <div className="
+                    absolute invisible opacity-0
+                    group-hover:visible group-hover:opacity-100
+                    transition-all duration-200
+                    bottom-full left-1/2 -translate-x-1/2 mb-3
+                    z-50 whitespace-nowrap bg-gray-900 text-white text-[10px]
+                    px-2 py-2 rounded shadow-xl pointer-events-none
+                ">
+                    Потужність: {pump.qCop235} kW | COP: {pump.cop235}
+
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-gray-900"></div>
+                </div>
+            )}
         </div>
     );
 }
@@ -173,7 +199,13 @@ export const nodeTypes = {
 };
 
 export function createNodeData(type: string, index: number): NodeData {
-    const label = `${type.charAt(0).toUpperCase() + type.slice(1)} ${index}`;
+    const nodeLabels: Record<string, string> = {
+        heat: 'Джерело тепла',
+        house: 'Будинок',
+        tank: 'Бак',
+        pipe: 'Труба',
+    };
+    const label = `${nodeLabels[type] ?? type} ${index}`;
 
     switch (type) {
         case 'heat':

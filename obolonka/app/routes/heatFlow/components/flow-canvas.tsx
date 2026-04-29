@@ -18,7 +18,8 @@ import { createNodeData, nodeTypes } from './nodes';
 import { ConfigForm } from './forms';
 import { EmptyCanvasHint, SelectionHint } from './hints';
 import { logSystemTree, runSimulation, type ChartDataPoint } from '../services/simulations';
-import SimulationResultsModal from './SimulationResModal';
+import SimulationResultsModal from './simulation-result-modal';
+import { StatusBar } from './status-bar';
 
 const defaultEdgeOptions = {
     type: 'smoothstep',
@@ -295,63 +296,10 @@ export function FlowCanvas({ sidebarWidth, minWidth }: FlowCanvasProps): React.R
             width: '100%',
             overflow: 'hidden'
         }}>
-            <div className="flex flex-wrap items-center justify-center gap-x-8 px-3 py-2 bg-white border-b border-gray-200 shadow-md shrink-0 select-none cursor-default">
-                {/* Simulation Button */}
-                <button
-                    onClick={handleStartSimulation}
-                    className="ml-4 flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white px-6 py-2 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 group"
-                >
-                    <span className="text-sm font-bold uppercase tracking-wider">Запустити симуляцію</span>
-                    <svg
-                        className="w-4 h-4 group-hover:translate-x-1 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </button>
-
-                {/* Статистика будинків */}
-                <div className="flex items-center gap-3 group whitespace-nowrap select-none">
-                    <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                    <span className="text-gray-500 uppercase text-[11px] tracking-wider select-none">Ксть будинків</span>
-                    <span className="font-medium text-gray-900 text-base select-none">{stats.totalHouses}</span>
-                </div>
-
-                {/* Статистика джерел тепла */}
-                <div className="flex items-center gap-3 group whitespace-nowrap select-none">
-                    <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                    <span className="text-gray-500 uppercase text-[11px] tracking-wider select-none">Ксть джерел тепла</span>
-                    <span className="font-medium text-gray-900 text-base select-none">{stats.totalHeaters}</span>
-                </div>
-
-                {/* Статистика з'єднань */}
-                <div className="flex items-center gap-3 group whitespace-nowrap select-none">
-                    <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
-                    <span className="text-gray-500 uppercase text-[11px] tracking-wider select-none">Ксть з'єднань</span>
-                    <span className="font-medium text-gray-900 text-base select-none">{stats.totalConnections}</span>
-                </div>
-
-                {/* Прогрес підключення */}
-                <div className="flex items-center gap-2 bg-gray-50 px-5 py-1 rounded-xl border border-gray-100 min-w-fit select-none cursor-default">
-                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold select-none">Статус підключення</span>
-                    <div className="flex items-baseline gap-1 select-none">
-                        <span className={`text-base font-bold ${stats.connectedHouses === stats.totalHouses ? 'text-green-600' : 'text-blue-600'} select-none`}>
-                            {stats.connectedHouses}
-                        </span>
-                        <span className="text-base text-gray-300 select-none">/</span>
-                        <span className="text-base text-gray-500 select-none">{stats.totalHouses}</span>
-                    </div>
-
-                    <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-green-500 transition-all duration-700"
-                            style={{ width: `${(stats.connectedHouses / (stats.totalHouses || 1)) * 100}%` }}
-                        />
-                    </div>
-                </div>
-            </div>
+            <StatusBar
+                stats={stats}
+                onStartSimulation={handleStartSimulation}
+            />
 
             <div
                 style={{
