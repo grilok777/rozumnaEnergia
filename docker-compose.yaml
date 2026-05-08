@@ -5,7 +5,7 @@ services:
     ports:
       - "5173:3000"
   backend_troian:
-    image: твій_нік/smart-energy-backend:latest
+    image: vitaliktroian04/smart-energy-stability:latest
     ports:
       - "8085:8085"
     restart: always    
